@@ -52,14 +52,6 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::185921645874:role/github-actions-djl-serving
           aws-region: us-east-1
-      - name: Build FlashAttn V2
-        run: |
-          . ./venv/bin/activate
-          export FLASH_ATTENTION_FORCE_BUILD=TRUE
-          git clone https://github.com/ymwangg/flash-attention flash-attention-v2 -b specdec_v0.3.3
-          cd flash-attention-v2
-          pip wheel . --no-deps
-          cp flash_attn-*.whl ../build_artifacts
       - name: Build vllm 0.3.3 speculative decoding
         run: |
           . ./venv/bin/activate
@@ -75,29 +67,10 @@ jobs:
           name: build-artifacts
           path: build_artifacts/
 
-  lmi-deps-upload:
-    runs-on: [ self-hosted, p4d ]
-    needs: lmi-deps-build
-    steps:
-      - name: Set up Python3
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: pip install awscli
-      - name: Download built-artifacts
-        uses: actions/download-artifact@v3
-        with:
-            name: build-artifacts
-      - name: upload to S3
-        run: |
-          aws s3 cp flash_attn-2*.whl s3://djl-ai-staging/publish/flash_attn/cu121-pt212/
-          aws s3 cp vllm*.whl s3://djl-ai-staging/publish/vllm/cu121-pt212/
-
   stop-runners-p4d:
     if: always()
     runs-on: [ self-hosted, scheduler ]
-    needs: [ create-runners-p4d, lmi-deps-build, lmi-deps-upload ]
+    needs: [ create-runners-p4d, lmi-deps-build ]
     steps:
       - name: Stop all instances
         run: |
