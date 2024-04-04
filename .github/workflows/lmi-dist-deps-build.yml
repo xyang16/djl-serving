@@ -8,28 +8,28 @@ permissions:
   contents: read
 
 jobs:
-  create-runners-p4d:
+  create-runners-g5:
     runs-on: [ self-hosted, scheduler ]
     steps:
-      - name: Create new P4d.24xl instance
-        id: create_gpu_p4d
+      - name: Create new G5 instance
+        id: create_gpu
         run: |
           cd /home/ubuntu/djl_benchmark_script/scripts
           token=$( curl -X POST -H "Authorization: token ${{ secrets.ACTION_RUNNER_PERSONAL_TOKEN }}" \
           https://api.github.com/repos/deepjavalibrary/djl-serving/actions/runners/registration-token \
           --fail \
           | jq '.token' | tr -d '"' )
-          ./start_instance.sh action_lmic_p4d $token djl-serving
+          ./start_instance.sh action_g5 $token djl-serving
     outputs:
-      p4d_instance_id: ${{ steps.create_gpu_p4d.outputs.action_lmic_p4d_instance_id }}
+      gpu_instance_id_1: ${{ steps.create_gpu.outputs.action_g5_instance_id }}
 
   lmi-deps-build:
-    runs-on: [ self-hosted, p4d ]
+    runs-on: [ self-hosted, g5 ]
     container:
       image: nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
       options: --gpus all --runtime=nvidia --shm-size 20g
     timeout-minutes: 35
-    needs: create-runners-p4d
+    needs: create-runners-g5
     steps:
       - uses: actions/checkout@v4
       - name: Setup Environment
@@ -67,13 +67,13 @@ jobs:
           name: build-artifacts
           path: build_artifacts/
 
-  stop-runners-p4d:
+  stop-runners-g5:
     if: always()
     runs-on: [ self-hosted, scheduler ]
-    needs: [ create-runners-p4d, lmi-deps-build ]
+    needs: [ create-runners-g5, lmi-deps-build ]
     steps:
       - name: Stop all instances
         run: |
           cd /home/ubuntu/djl_benchmark_script/scripts
-          instance_id=${{ needs.create-runners-p4d.outputs.p4d_instance_id }}
+          instance_id=${{ needs.create-runners.outputs.gpu_instance_id_1 }}
           ./stop_instance.sh $instance_id
