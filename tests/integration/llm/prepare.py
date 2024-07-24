@@ -898,60 +898,39 @@ trtllm_handler_list = {
 }
 
 correctness_model_list = {
-    "trtllm-codestral-22b": {
-        "engine": "Python",
-        "option.task": "text-generation",
-        "option.model_id": "bullerwins/Codestral-22B-v0.1-hf",
-        "option.rolling_batch": "trtllm",
-        "option.tensor_parallel_degree": 4,
-        "option.max_rolling_batch_size": 41
-    },
-    "lmi-dist-codestral-22b": {
-        "engine": "MPI",
-        "option.task": "text-generation",
-        "option.model_id": "bullerwins/Codestral-22B-v0.1-hf",
-        "option.rolling_batch": "lmi-dist",
-        "option.tensor_parallel_degree": 4,
-        "option.max_rolling_batch_size": 41
-    },
-    "neuronx-codestral-22b": {
-        "engine": "Python",
-        "option.entryPoint": "djl_python.transformers_neuronx",
-        "option.model_id": "bullerwins/Codestral-22B-v0.1-hf",
-        "option.tensor_parallel_degree": 4,
-        "option.n_positions": 256,
-        "option.rolling_batch": "auto",
-        "option.max_rolling_batch_size": 41,
-        "option.model_loading_timeout": 1800
-    },
-    "trtllm-llama3-1-8b": {
-        "engine": "Python",
-        "option.task": "text-generation",
-        "option.model_id": "s3://djl-llm/llama-3.1-8b-hf/",
-        "option.rolling_batch": "trtllm",
-        "option.tensor_parallel_degree": 4,
-        "option.max_rolling_batch_size": 213
-    },
     "lmi-dist-llama3-1-8b": {
         "engine": "MPI",
         "option.task": "text-generation",
         "option.model_id": "s3://djl-llm/llama-3.1-8b-hf/",
         "option.rolling_batch": "lmi-dist",
-        "option.tensor_parallel_degree": 4,
+        "option.tensor_parallel_degree": 8,
         "option.max_rolling_batch_size": 213
     },
-    "neuronx-llama3-1-8b": {
-        "engine": "Python",
-        "option.entryPoint": "djl_python.transformers_neuronx",
-        "option.model_id": "s3://djl-llm/llama-3.1-8b-hf/",
-        "option.tensor_parallel_degree": 4,
-        "option.n_positions": 768,
-        "option.rolling_batch": "auto",
-        "option.max_rolling_batch_size": 213,
-        "option.model_loading_timeout": 1800
+    "lmi-dist-llama3-8b": {
+        "engine": "MPI",
+        "option.task": "text-generation",
+        "option.model_id": "s3://djl-llm/llama-3-8b-hf/",
+        "option.rolling_batch": "lmi-dist",
+        "option.tensor_parallel_degree": 8,
+        "option.max_rolling_batch_size": 213
+    },
+    "lmi-dist-llama3-1-70b": {
+        "engine": "MPI",
+        "option.task": "text-generation",
+        "option.model_id": "s3://djl-llm/llama-3.1-70b-hf/",
+        "option.rolling_batch": "lmi-dist",
+        "option.tensor_parallel_degree": 8,
+        "option.max_rolling_batch_size": 213
+    },
+    "lmi-dist-llama3-70b": {
+        "engine": "MPI",
+        "option.task": "text-generation",
+        "option.model_id": "s3://djl-llm/llama-3-70b-hf/",
+        "option.rolling_batch": "lmi-dist",
+        "option.tensor_parallel_degree": 8,
+        "option.max_rolling_batch_size": 213
     }
 }
-
 
 def write_model_artifacts(properties,
                           requirements=None,

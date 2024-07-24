@@ -701,40 +701,18 @@ no_code_rolling_batch_spec = {
 }
 
 correctness_model_spec = {
-    "trtllm-codestral-22b": {
+    "lmi-dist-llama3-1-8b-humaneval": {
         "batch_size": [41],
         "seq_length": [512],
         "num_run": 4,
-        "tokenizer": "bullerwins/Codestral-22B-v0.1-hf",
+        "tokenizer": "TheBloke/Llama-2-7B-fp16",
         "dataset": "humaneval",
-        "score": 0.04,
+        "score": 0.2,
         "parameters": {
             "return_full_text": True
         }
     },
-    "lmi-dist-codestral-22b": {
-        "batch_size": [41],
-        "seq_length": [512],
-        "num_run": 4,
-        "tokenizer": "bullerwins/Codestral-22B-v0.1-hf",
-        "dataset": "humaneval",
-        "score": 0.5,
-        "parameters": {
-            "return_full_text": True
-        }
-    },
-    "neuronx-codestral-22b": {
-        "batch_size": [41],
-        "seq_length": [512],
-        "num_run": 4,
-        "tokenizer": "bullerwins/Codestral-22B-v0.1-hf",
-        "dataset": "humaneval",
-        "score": 0.01,
-        "parameters": {
-            "return_full_text": True
-        }
-    },
-    "trtllm-llama3-1-8b": {
+    "lmi-dist-llama3-1-8b-mmlu": {
         "batch_size": [213],
         "seq_length": [1],
         "num_run": 66,
@@ -742,7 +720,18 @@ correctness_model_spec = {
         "dataset": "mmlu",
         "score": 0.6
     },
-    "lmi-dist-llama3-1-8b": {
+    "lmi-dist-llama3-8b-humaneval": {
+        "batch_size": [41],
+        "seq_length": [512],
+        "num_run": 4,
+        "tokenizer": "TheBloke/Llama-2-7B-fp16",
+        "dataset": "humaneval",
+        "score": 0.2,
+        "parameters": {
+            "return_full_text": True
+        }
+    },
+    "lmi-dist-llama3-8b-mmlu": {
         "batch_size": [213],
         "seq_length": [1],
         "num_run": 66,
@@ -750,13 +739,43 @@ correctness_model_spec = {
         "dataset": "mmlu",
         "score": 0.6
     },
-    "neuronx-llama3-1-8b": {
+    "lmi-dist-llama3-1-70b-humaneval": {
+        "batch_size": [41],
+        "seq_length": [512],
+        "num_run": 4,
+        "tokenizer": "TheBloke/Llama-2-7B-fp16",
+        "dataset": "humaneval",
+        "score": 0.2,
+        "parameters": {
+            "return_full_text": True
+        }
+    },
+    "lmi-dist-llama3-1-70b-mmlu": {
         "batch_size": [213],
         "seq_length": [1],
         "num_run": 66,
         "tokenizer": "TheBloke/Llama-2-7B-fp16",
         "dataset": "mmlu",
-        "score": 0.6
+        "score": 0.7
+    },
+    "lmi-dist-llama3-70b-humaneval": {
+        "batch_size": [41],
+        "seq_length": [512],
+        "num_run": 4,
+        "tokenizer": "TheBloke/Llama-2-7B-fp16",
+        "dataset": "humaneval",
+        "score": 0.2,
+        "parameters": {
+            "return_full_text": True
+        }
+    },
+    "lmi-dist-llama3-70b-mmlu": {
+        "batch_size": [213],
+        "seq_length": [1],
+        "num_run": 66,
+        "tokenizer": "TheBloke/Llama-2-7B-fp16",
+        "dataset": "mmlu",
+        "score": 0.7
     }
 }
 
@@ -814,7 +833,7 @@ def validate_correctness(type, tasks, expected):
                         except JSONDecodeError:
                             # delete the last input
                             del inputs[-1]
-                            LOGGER.error(f"Failed to read output: {v}")
+                            LOGGER.error(f"Failed to read output: '{v}'")
 
     if len(outputs) == 0:
         raise RuntimeError(f"No output found in {output_dir}")
@@ -891,7 +910,10 @@ def awscurl_run(data,
     if tokenizer:
         command = f"TOKENIZER={tokenizer} {command}"
     if output:
-        output_path = os.path.join(os.path.curdir, "outputs", "output")
+        output_dir = os.path.join(os.path.curdir, "outputs")
+        shutil.rmtree(output_dir, ignore_errors=True)
+        os.mkdir(output_dir)
+        output_path = os.path.join(output_dir, "output")
         command = f"{command} -o {output_path}"
     LOGGER.info(f"Running command {command}")
     res = sp.run(command, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)

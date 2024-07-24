@@ -11,55 +11,31 @@ on:
     - cron: '0 9 * * *'
 
 jobs:
-  create-runners:
+  create-runners-p4d:
     runs-on: [self-hosted, scheduler]
     steps:
-      - name: Create new G6 instance
-        id: create_gpu1
+      - name: Create new P4d.24xl instance
+        id: create_gpu_p4d
         run: |
           cd /home/ubuntu/djl_benchmark_script/scripts
           token=$( curl -X POST -H "Authorization: token ${{ secrets.ACTION_RUNNER_PERSONAL_TOKEN }}" \
           https://api.github.com/repos/deepjavalibrary/djl-serving/actions/runners/registration-token \
           --fail \
           | jq '.token' | tr -d '"' )
-          ./start_instance.sh action_g6 $token djl-serving
-      - name: Create new G6 instance
-        id: create_gpu2
-        run: |
-          cd /home/ubuntu/djl_benchmark_script/scripts
-          token=$( curl -X POST -H "Authorization: token ${{ secrets.ACTION_RUNNER_PERSONAL_TOKEN }}" \
-          https://api.github.com/repos/deepjavalibrary/djl-serving/actions/runners/registration-token \
-          --fail \
-          | jq '.token' | tr -d '"' )
-          ./start_instance.sh action_g6 $token djl-serving
-      - name: Create new Inf2.24xl instance
-        id: create_inf2
-        run: |
-          cd /home/ubuntu/djl_benchmark_script/scripts
-          token=$( curl -X POST -H "Authorization: token ${{ secrets.ACTION_RUNNER_PERSONAL_TOKEN }}" \
-          https://api.github.com/repos/deepjavalibrary/djl-serving/actions/runners/registration-token \
-          --fail \
-          | jq '.token' | tr -d '"' )
-          ./start_instance.sh action_inf2 $token djl-serving
+          ./start_instance.sh action_lmic_p4d $token djl-serving
     outputs:
-      gpu_instance_id_1: ${{ steps.create_gpu1.outputs.action_g6_instance_id }}
-      gpu_instance_id_2: ${{ steps.create_gpu2.outputs.action_g6_instance_id }}
-      inf2_instance_id: ${{ steps.create_inf2.outputs.action_inf2_instance_id }}
+      p4d_instance_id: ${{ steps.create_gpu_p4d.outputs.action_lmic_p4d_instance_id }}
 
   test:
     runs-on: [ "${{ matrix.test.instance }}" ]
     timeout-minutes: 90
-    needs: create-runners
+    needs: create-runners-p4d
     strategy:
       fail-fast: false
       matrix:
         test:
-          - test: TestCorrectnessTrtLlm
-            instance: g6
           - test: TestCorrectnessLmiDist
-            instance: g6
-          - test: TestCorrectnessNeuronx
-            instance: inf2
+            instance: p4d
     steps:
       - uses: actions/checkout@v4
       - name: Clean env
@@ -116,17 +92,13 @@ jobs:
           name: test-${{ matrix.test.test }}-logs
           path: tests/integration/all_logs/
 
-  stop-runners:
+  stop-runners-p4d:
     if: always()
     runs-on: [ self-hosted, scheduler ]
-    needs: [ create-runners, test]
+    needs: [ create-runners-p4d, test ]
     steps:
       - name: Stop all instances
         run: |
           cd /home/ubuntu/djl_benchmark_script/scripts
-          instance_id=${{ needs.create-runners.outputs.gpu_instance_id_1 }}
-          ./stop_instance.sh $instance_id
-          instance_id=${{ needs.create-runners.outputs.gpu_instance_id_2 }}
-          ./stop_instance.sh $instance_id
-          instance_id=${{ needs.create-runners.outputs.inf2_instance_id }}
+          instance_id=${{ needs.create-runners-p4d.outputs.p4d_instance_id }}
           ./stop_instance.sh $instance_id

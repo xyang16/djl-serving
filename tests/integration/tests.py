@@ -834,7 +834,6 @@ class TestNeuronxRollingBatch:
 
 @pytest.mark.correctness
 @pytest.mark.trtllm
-@pytest.mark.gpu_4
 class TestCorrectnessTrtLlm:
 
     def test_codestral_22b(self):
@@ -852,20 +851,35 @@ class TestCorrectnessTrtLlm:
 
 @pytest.mark.correctness
 @pytest.mark.lmi_dist
-@pytest.mark.gpu_4
 class TestCorrectnessLmiDist:
-
-    def test_codestral_22b(self):
-        with Runner('lmi', 'codestral-22b') as r:
-            prepare.build_correctness_model("lmi-dist-codestral-22b")
-            r.launch()
-            client.run("correctness lmi-dist-codestral-22b".split())
 
     def test_llama3_1_8b(self):
         with Runner('lmi', 'llama3-1-8b') as r:
             prepare.build_correctness_model("lmi-dist-llama3-1-8b")
             r.launch()
-            client.run("correctness lmi-dist-llama3-1-8b".split())
+            client.run("correctness lmi-dist-llama3-1-8b-humaneval".split())
+            client.run("correctness lmi-dist-llama3-1-8b-mmlu".split())
+
+    def test_llama3_8b(self):
+        with Runner('lmi', 'llama3-8b') as r:
+            prepare.build_correctness_model("lmi-dist-llama3-8b")
+            r.launch()
+            client.run("correctness lmi-dist-llama3-8b-humaneval".split())
+            client.run("correctness lmi-dist-llama3-8b-mmlu".split())
+
+    def test_llama3_1_70b(self):
+        with Runner('lmi', 'llama3-1-70b') as r:
+            prepare.build_correctness_model("lmi-dist-llama3-1-70b")
+            r.launch()
+            client.run("correctness lmi-dist-llama3-1-70b-humaneval".split())
+            client.run("correctness lmi-dist-llama3-1-70b-mmlu".split())
+
+    def test_llama3_70b(self):
+        with Runner('lmi', 'llama3-70b') as r:
+            prepare.build_correctness_model("lmi-dist-llama3-70b")
+            r.launch()
+            client.run("correctness lmi-dist-llama3-70b-humaneval".split())
+            client.run("correctness lmi-dist-llama3-70b-mmlu".split())
 
 
 @pytest.mark.correctness
