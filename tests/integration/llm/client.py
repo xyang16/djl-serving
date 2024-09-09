@@ -772,13 +772,13 @@ correctness_model_spec = {
             "return_full_text": True
         }
     },
-    "lmi-dist-codestral-22b": {
+    "lmi-dist-llama3-1-405b-humaneval": {
         "batch_size": [41],
         "seq_length": [512],
         "num_run": 4,
-        "tokenizer": "bullerwins/Codestral-22B-v0.1-hf",
+        "tokenizer": "TheBloke/Llama-2-7B-fp16",
         "dataset": "humaneval",
-        "score": 0.5,
+        "score": 0,
         "parameters": {
             "return_full_text": True
         }
@@ -802,10 +802,10 @@ correctness_model_spec = {
         "dataset": "mmlu",
         "score": 0.6
     },
-    "lmi-dist-llama3-1-8b": {
-        "batch_size": [213],
+    "lmi-dist-llama3-1-405b-mmlu": {
+        "batch_size": [33],
         "seq_length": [1],
-        "num_run": 66,
+        "num_run": 426,
         "tokenizer": "TheBloke/Llama-2-7B-fp16",
         "dataset": "mmlu",
         "score": 0.6

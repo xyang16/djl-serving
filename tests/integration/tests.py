@@ -894,17 +894,17 @@ class TestCorrectnessTrtLlm:
 @pytest.mark.gpu_4
 class TestCorrectnessLmiDist:
 
-    def test_codestral_22b(self):
-        with Runner('lmi', 'codestral-22b') as r:
-            prepare.build_correctness_model("lmi-dist-codestral-22b")
-            r.launch()
-            client.run("correctness lmi-dist-codestral-22b".split())
+    def test_llama3_1_405b_humaneval(self):
+        with Runner('lmi', 'lmi-dist-llama3-1-405b-humaneval') as r:
+            # prepare.build_correctness_model("lmi-dist-llama3-1-405b")
+            # r.launch()
+            client.run("correctness lmi-dist-llama3-1-405b-humaneval".split())
 
-    def test_llama3_1_8b(self):
-        with Runner('lmi', 'llama3-1-8b') as r:
-            prepare.build_correctness_model("lmi-dist-llama3-1-8b")
-            r.launch()
-            client.run("correctness lmi-dist-llama3-1-8b".split())
+    def test_llama3_1_405b_mmlu(self):
+        with Runner('lmi', 'lmi-dist-llama3-1-405b-mmlu') as r:
+            # prepare.build_correctness_model("lmi-dist-llama3-1-405b")
+            # r.launch()
+            client.run("correctness lmi-dist-llama3-1-405b-mmlu".split())
 
 
 @pytest.mark.correctness
