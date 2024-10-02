@@ -13,6 +13,7 @@
 import logging
 import os
 import re
+import time
 
 import torch
 from transformers import (pipeline, Pipeline, AutoModelForCausalLM,
@@ -494,13 +495,13 @@ def register_adapter(inputs: Input):
     """
     Registers lora adapter with the model.
     """
+    start = time.time()
     adapter_name = inputs.get_property("name")
     adapter_path = inputs.get_property("src")
     if not os.path.exists(adapter_path):
         raise ValueError(
             f"Only local LoRA models are supported. {adapter_path} is not a valid path"
         )
-    logging.info(f"Registering adapter {adapter_name} from {adapter_path}")
     _service.adapter_registry[adapter_name] = inputs
     if not is_rolling_batch_enabled(_service.hf_configs.rolling_batch):
         if isinstance(_service.model, PeftModel):
@@ -515,6 +516,9 @@ def register_adapter(inputs: Input):
 
         if isinstance(_service.hf_pipeline_unwrapped, Pipeline):
             _service.hf_pipeline_unwrapped.model = _service.model
+    logging.info(
+        f"Registering adapter {adapter_name} from {adapter_path} took {(time.time() - start) * 1000} millis"
+    )
     return Output()
 
 
