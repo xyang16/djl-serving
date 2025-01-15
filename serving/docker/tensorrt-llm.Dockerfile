@@ -16,7 +16,8 @@ ARG python_version=3.10
 ARG TORCH_VERSION=2.4.0
 ARG djl_version
 ARG djl_serving_version
-ARG transformers_version=4.44.2
+ARG transformers_version=4.45.2
+ARG tokenizers_version=0.20.3
 ARG accelerate_version=0.32.1
 ARG tensorrtlibs_version=10.1.0
 # %2B is the url escape for the '+' character
@@ -34,6 +35,7 @@ ARG janus_version=1.0.0
 ARG pynvml_verison=11.5.0
 ARG numpy_version=1.26.4
 ARG datasets_version=2.19.1
+ARG vllm_version=v0.6.6.post1
 
 EXPOSE 8080
 
@@ -70,16 +72,17 @@ RUN mv *.deb djl-serving_all.deb || true
 
 # Install OpenMPI and other deps
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y g++ wget unzip openmpi-bin libopenmpi-dev libffi-dev git-lfs rapidjson-dev graphviz && \
+RUN apt-get update && apt-get install -y g++ wget unzip openmpi-bin libopenmpi-dev libffi-dev git-lfs rapidjson-dev graphviz libgl1 && \
     scripts/install_python.sh ${python_version} && \
     pip3 cache purge && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # Install PyTorch
 # Qwen needs transformers_stream_generator, tiktoken and einops
-RUN pip install torch==${TORCH_VERSION} transformers==${transformers_version} accelerate==${accelerate_version} peft==${peft_version} sentencepiece \
+RUN pip install torch==${TORCH_VERSION} transformers==${transformers_version} tokenizers==${tokenizers_version} accelerate==${accelerate_version} peft==${peft_version} sentencepiece \
     mpi4py cuda-python==${cuda_python_version} onnx polygraphy pynvml==${pynvml_verison} datasets==${datasets_version} pydantic==${pydantic_version} scipy torchprofile bitsandbytes ninja \
-    transformers_stream_generator einops tiktoken jinja2 graphviz blobfile colored h5py strenum pulp flax easydict && \
+    transformers_stream_generator einops tiktoken jinja2 graphviz blobfile colored h5py strenum pulp flax easydict \
+    msgspec mistral_common jsonschema referencing rpds-py jsonschema_specifications opencv-python py-cpuinfo openai httpx sniffio anyio exceptiongroup distro jiter && \
     pip3 cache purge
 
 # Install TensorRT and TRT-LLM Deps
@@ -108,6 +111,7 @@ RUN scripts/install_djl_serving.sh $djl_version $djl_serving_version && \
     useradd -m -d /home/djl djl && \
     chown -R djl:djl /opt/djl && \
     rm -rf scripts && \
+    pip3 install --no-deps vllm==${vllm_version} && \
     pip3 install numpy==${numpy_version} && \
     pip3 cache purge && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/*
